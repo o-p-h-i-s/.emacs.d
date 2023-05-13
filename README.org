@@ -1,27 +1,35 @@
 #+TITLE: Emacs Settings
 #+AUTHOR: Ophis Oelawyll
 #+EMAIL: 00231c7763@gmail.com
-#+STARTUP: overview
+#+STARTUP: content
 * Emacsの設定
 ** 初期設定
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle init.el
   (eval-and-compile
     (when (or load-file-name byte-compile-current-file)
       (setq user-emacs-directory
 	    (expand-file-name
 	     (file-name-directory (or load-file-name byte-compile-current-file))))))
 #+end_src
+#+begin_src emacs-lisp :tangle early-init.el
+  (push '(menu-bar-lines . 0) default-frame-alist)
+  (push '(tool-bar-lines . 0) default-frame-alist)
+  (push '(vertical-scroll-bars) default-frame-alist)
+
+  (provide 'early-init)
+#+end_src
+** Plugin Manager
 ** other
 #+begin_src emacs-lisp
   (setq scroll-conservatively 1)
   (setq scroll-margin 10)
   (setq split-width-threshold 1)
-  (setq default-tab-width 3)
+  (setq tab-width 3)
   (setq line-move-visual t)
   (setq inhibit-startup-message t)
-  (menu-bar-mode -1)
-  (tool-bar-mode 0)
-  (scroll-bar-mode 0)
+  ;;(menu-bar-mode -1)
+  ;;(tool-bar-mode 0)
+  ;;(scroll-bar-mode 0)
   (when (version<= "26.0.50" emacs-version)
     (progn (global-display-line-numbers-mode)
 	   (custom-set-variables '(display-line-numbers-width-start t))))

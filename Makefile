@@ -1,5 +1,7 @@
 EMACS ?= emacs
-EL     = init.el
+INIT   = init.el
+EARLY  = early-init.el
+EL     = $(INIT) $(EARLY)
 ELC    = $(EL:%.el=%.elc)
 
 all: $(ELC)
@@ -17,4 +19,4 @@ init.el: README.org
 	$(EMACS) -Q -l init.el --batch -f batch-byte-compile $<
 
 clean:
-	rm -rf *.el *.elc *~ auto-save-list backups snippets
+	rm -rf *.el *.elc *~ backups snippets auto-save-list eln-cache
