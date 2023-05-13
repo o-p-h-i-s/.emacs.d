@@ -1,0 +1,48 @@
+#+TITLE: Emacs Settings
+#+AUTHOR: Ophis Oelawyll
+#+EMAIL: 00231c7763@gmail.com
+#+STARTUP: overview
+* Emacsの設定
+** 初期設定
+#+begin_src emacs-lisp
+  (eval-and-compile
+    (when (or load-file-name byte-compile-current-file)
+      (setq user-emacs-directory
+	    (expand-file-name
+	     (file-name-directory (or load-file-name byte-compile-current-file))))))
+#+end_src
+** other
+#+begin_src emacs-lisp
+  (setq scroll-conservatively 1)
+  (setq scroll-margin 10)
+  (setq split-width-threshold 1)
+  (setq default-tab-width 3)
+  (setq line-move-visual t)
+  (setq inhibit-startup-message t)
+  (menu-bar-mode -1)
+  (tool-bar-mode 0)
+  (scroll-bar-mode 0)
+  (when (version<= "26.0.50" emacs-version)
+    (progn (global-display-line-numbers-mode)
+	   (custom-set-variables '(display-line-numbers-width-start t))))
+  (setq default-frame-alist
+	'((fullscreen . maximized)
+	  (font . "CaskaydiaCove NFM Light-16")))
+  (load-theme 'wombat t)
+  (define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
+  (define-key key-translation-map (kbd "<DEL>") (kbd "C-h"))
+  (electric-pair-mode t)
+  (setq make-backup-files t)
+  (setq backup-directory-alist '((".*" . "~/.emacs.d/backups")))
+  (setq auto-save-list-file-prefix "~/.emacs.d/backups/.save~")
+  (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/backups/" t)))
+  (setq create-lockfiles nil)
+  (setq custom-file (locate-user-emacs-file "custom.el"))
+  (defun open-setting-file()
+    (interactive)
+    (find-file "~/.emacs.d/README.org"))
+  (defun reload-setting()
+    (interactive)
+    (load-file "~/.emacs.d/init.el"))
+#+end_src
+
