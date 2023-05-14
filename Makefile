@@ -19,4 +19,7 @@ init.el: README.org
 	$(EMACS) -Q -l init.el --batch -f batch-byte-compile $<
 
 clean:
-	rm -rf *.el *.elc *~ backups snippets auto-save-list eln-cache
+	rm -rf *.el *.elc
+
+cleandist:
+	rm -rf backups snippets auto-save-list eln-cache elpa

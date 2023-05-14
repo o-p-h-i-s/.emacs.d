@@ -4,53 +4,108 @@
 #+STARTUP: content
 * Emacsの設定
 ** 初期設定
+任意のディレクトリでinit.elが読み込めるようにする。
 #+begin_src emacs-lisp :tangle init.el
   (eval-and-compile
     (when (or load-file-name byte-compile-current-file)
       (setq user-emacs-directory
-	    (expand-file-name
-	     (file-name-directory (or load-file-name byte-compile-current-file))))))
+            (expand-file-name
+             (file-name-directory (or load-file-name byte-compile-current-file))))))
 #+end_src
+** early-init.elの設定
+GUI等よりも早く読み込まれる設定。
 #+begin_src emacs-lisp :tangle early-init.el
-  (push '(menu-bar-lines . 0) default-frame-alist)
-  (push '(tool-bar-lines . 0) default-frame-alist)
-  (push '(vertical-scroll-bars) default-frame-alist)
+  (push '(menu-bar-lines . nil) default-frame-alist)
+  (push '(tool-bar-lines . nil) default-frame-alist)
+  (push '(vertical-scroll-bars . nil) default-frame-alist)
+  (push '(blink-cursor-mode . nil) default-frame-alist)
+  (push '(fullscreen . maximized) default-frame-alist)
+  (push '(font . "CaskaydiaCove NFM Light-16") default-frame-alist)
+  (setq frame-inhibit-implied-resize t)
 
   (provide 'early-init)
 #+end_src
-** Plugin Manager
-** other
-#+begin_src emacs-lisp
-  (setq scroll-conservatively 1)
-  (setq scroll-margin 10)
-  (setq split-width-threshold 1)
-  (setq tab-width 3)
-  (setq line-move-visual t)
-  (setq inhibit-startup-message t)
-  ;;(menu-bar-mode -1)
-  ;;(tool-bar-mode 0)
-  ;;(scroll-bar-mode 0)
-  (when (version<= "26.0.50" emacs-version)
-    (progn (global-display-line-numbers-mode)
-	   (custom-set-variables '(display-line-numbers-width-start t))))
-  (setq default-frame-alist
-	'((fullscreen . maximized)
-	  (font . "CaskaydiaCove NFM Light-16")))
-  (load-theme 'wombat t)
-  (define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
-  (define-key key-translation-map (kbd "<DEL>") (kbd "C-h"))
-  (electric-pair-mode t)
-  (setq make-backup-files t)
-  (setq backup-directory-alist '((".*" . "~/.emacs.d/backups")))
-  (setq auto-save-list-file-prefix "~/.emacs.d/backups/.save~")
-  (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/backups/" t)))
-  (setq create-lockfiles nil)
-  (setq custom-file (locate-user-emacs-file "custom.el"))
+** 自作関数群
+#+begin_src emacs-lisp :tangle init.el
   (defun open-setting-file()
     (interactive)
-    (find-file "~/.emacs.d/README.org"))
+    (find-file (concat user-emacs-directory "README.org")))
   (defun reload-setting()
     (interactive)
-    (load-file "~/.emacs.d/init.el"))
+    (load-file (concat user-emacs-directory "init.el")))
+  (defun delete-trailing-whitespace-exc-extension(exc-extension)
+    (interactive)
+    (unless (eq nil buffer-file-name)
+      (unless (member (file-name-extension buffer-file-name t) exc-extension)
+        (delete-trailing-whitespace))))
+#+end_src
+** パッケージの管理
+パッケージや設定の管理はleaf.elで行う。
+#+begin_src emacs-lisp :tangle init.el
+  (eval-and-compile
+    (customize-set-variable
+     'package-archives '(("org"   . "https://orgmode.org/elpa/")
+                         ("melpa" . "https://melpa.org/packages/")
+                         ("gnu"   . "https://elpa.gnu.org/packages/")))
+    (package-initialize)
+    (unless (package-installed-p 'leaf)
+      (package-refresh-contents)
+      (package-install 'leaf))
+
+    (leaf leaf-keywords
+      :ensure t
+      :init
+      (leaf hydra :ensure t)
+      (leaf diminish :ensure t)
+      :config
+      (leaf-keywords-init)))
+#+end_src
+** 自動生成されるファイル
+#+begin_src emacs-lisp :tangle init.el
+  (leaf backup
+    :require nil
+    :custom
+    `((make-backup-files . t)
+      (backup-directory-alist . '((".*" . ,(concat user-emacs-directory "backups"))))
+      (auto-save-list-file-prefix . ,(concat user-emacs-directory "backups/.save~"))
+      (auto-save-file-name-transforms . '((".*" ,(concat user-emacs-directory "backups") t)))
+      (create-lockfiles . nil)))
+#+end_src
+** Org
+#+begin_src emacs-lisp :tangle init.el
+  (leaf org
+    :ensure t
+    :init
+    (leaf org-tempo
+      :require t
+      :config
+      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp :tangle init.el"))
+      (add-to-list 'org-structure-template-alist '("n" . "note")))
+    :custom
+    (org-startup-indented . t)
+    (org-indent-mode-turns-on-hiding-stars . nil)
+    (org-indent-indentation-per-level . 3))
+#+end_src
+** 補完
+#+begin_src emacs-lisp :tangle init.el
+  (leaf completions
+    :custom
+    (electric-pair-mode . t))
+#+end_src
+** 外観
+#+begin_src emacs-lisp :tangle init.el
+  (leaf appearance
+    :custom
+    (inhibit-startup-message . t)
+    :config
+    (leaf atom-one-dark-theme
+      :ensure t
+      :config
+      (load-theme 'atom-one-dark t)))
+#+end_src
+** キーバインド
+#+begin_src emacs-lisp :tangle init.el
+  (define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
+  (define-key key-translation-map (kbd "<DEL>") (kbd "C-h"))
 #+end_src
 
