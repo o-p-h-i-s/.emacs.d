@@ -3,6 +3,8 @@ INIT   = init.el
 EARLY  = early-init.el
 EL     = $(INIT) $(EARLY)
 ELC    = $(EL:%.el=%.elc)
+FILE   = *.el *.elc
+DIRS   = backups snippets auto-save-list eln-cache elpa eshell
 
 all: $(ELC)
 
@@ -19,7 +21,10 @@ init.el: README.org
 	$(EMACS) -Q -l init.el --batch -f batch-byte-compile $<
 
 clean:
-	rm -rf *.el *.elc
+	rm -rf $(FILE)
 
 cleandist:
-	rm -rf backups snippets auto-save-list eln-cache elpa
+	rm -rf $(DIRS)
+
+cleanall:
+	rm -rf $(FILE) $(DIRS)

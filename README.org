@@ -75,37 +75,127 @@ GUI等よりも早く読み込まれる設定。
 #+begin_src emacs-lisp :tangle init.el
   (leaf org
     :ensure t
-    :init
-    (leaf org-tempo
-      :require t
-      :config
-      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp :tangle init.el"))
-      (add-to-list 'org-structure-template-alist '("n" . "note")))
+    :defvar org-structure-template-alist
     :custom
     (org-startup-indented . t)
     (org-indent-mode-turns-on-hiding-stars . nil)
-    (org-indent-indentation-per-level . 3))
+    (org-indent-indentation-per-level . 3)
+    :config
+    (leaf org-tempo
+      :require t)
+    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp :tangle init.el"))
+    (add-to-list 'org-structure-template-alist '("n" . "note")))
 #+end_src
 ** 補完
 #+begin_src emacs-lisp :tangle init.el
   (leaf completions
+    :require nil
     :custom
-    (electric-pair-mode . t))
+    (electric-pair-mode . t)
+    :config
+    (leaf company
+      :ensure t
+      :emacs>= "24.3"
+      :bind
+      ((company-active-map
+        ("M-n" . nil)
+        ("M-p" . nil)
+        ("C-s" . company-filter-candidates)
+        ("C-n" . company-select-next)
+        ("C-p" . company-select-previous)
+        ("C-i" . company-complete-selection))
+       (company-search-map
+        ("C-n" . company-select-next)
+        ("C-p" . company-select-previous)))
+      :custom
+      (company-idle-delay . 0)
+      (company-minimum-prefix-length . 1)
+      (company-transformers . '(company-sort-by-occurrence))
+      :config
+      (leaf rust-mode
+        :ensure t
+        :custom
+        (rust-enable-format-on-save . t))
+      (leaf cargo
+        :ensure t
+        :hook (rust-mode . cargo-minor-mode))
+      (leaf eglot
+        :ensure t
+        :require t
+        :defvar eglot-server-programs
+        :hook (rust-mode-hook . eglot-ensure)
+        :config
+        (add-to-list 'eglot-server-programs '(rust-mode "rust-analyzer")))
+      (add-to-list 'exec-path (expand-file-name "/usr/bin/rust-analyzer"))
+      (add-to-list 'exec-path (expand-file-name "~/.cargo/bin"))
+      :global-minor-mode global-company-mode))
 #+end_src
 ** 外観
 #+begin_src emacs-lisp :tangle init.el
   (leaf appearance
+    :require nil
     :custom
     (inhibit-startup-message . t)
     :config
+    (leaf number
+      :require nil
+      :emacs>= "26.0.50"
+      :custom
+      (display-line-numbers-width-start . t)
+      :global-minor-mode
+      (global-display-line-numbers-mode))
     (leaf atom-one-dark-theme
       :ensure t
       :config
-      (load-theme 'atom-one-dark t)))
+      (load-theme 'atom-one-dark t))
+    (leaf dashboard
+      :ensure t
+      :config
+      (dashboard-setup-startup-hook))
+    (leaf ligature
+      :ensure t
+      :config
+      (ligature-set-ligatures '(prog-mode org-mode) '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+                                                      ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+                                                      "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+                                                      "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+                                                      "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+                                                      "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+                                                      "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+                                                      "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+                                                      ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+                                                      "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+                                                      "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+                                                      "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+                                                      "\\\\" "://"))
+      (global-ligature-mode t)))
+#+end_src
+** emacsの挙動
+#+begin_src emacs-lisp :tangle init.el
+  (leaf behavior
+    :require nil
+    :custom
+    (scroll-conservatively . 1)
+    (scroll-margin . 10)
+    (split-width-threshold . 1)
+    (line-move-visual . t)
+    (max-lisp-eval-depth . 10000)
+    :config
+    (leaf restart-emacs
+      :ensure t))
 #+end_src
 ** キーバインド
 #+begin_src emacs-lisp :tangle init.el
   (define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
   (define-key key-translation-map (kbd "<DEL>") (kbd "C-h"))
 #+end_src
-
+** custom-set-* > custom.el
+#+begin_src emacs-lisp :tangle init.el
+  (leaf cus-edit
+    :require nil
+    :custom `((custom-file . ,(locate-user-emacs-file "custom.el"))))
+#+end_src
+** end init.el
+#+begin_src emacs-lisp :tangle init.el
+  (provide 'init)
+#+end_src
