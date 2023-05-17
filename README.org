@@ -268,7 +268,6 @@ GUI等よりも早く読み込まれる設定。
     (push '("to" "touch") eshell-command-aliases-list)
     (push '("so" "source") eshell-command-aliases-list)
     (push '("emacs" "find-file $1") eshell-command-aliases-list))
-
 #+end_src
 ** git
 #+begin_src emacs-lisp :tangle init.el
