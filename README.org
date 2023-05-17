@@ -262,7 +262,7 @@ GUI等よりも早く読み込まれる設定。
   (leaf eshell
     :require nil
     :config
-    (defvar eshell-command-aliases-list)
+    (defvar eshell-command-aliases-list '())
     (push '("ls" "ls --color=auto") eshell-command-aliases-list)
     (push '("ll" "ls -alF") eshell-command-aliases-list)
     (push '("to" "touch") eshell-command-aliases-list)
