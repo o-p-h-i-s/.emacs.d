@@ -267,8 +267,18 @@ GUI等よりも早く読み込まれる設定。
     (push '("ll" "ls -alF") eshell-command-aliases-list)
     (push '("to" "touch") eshell-command-aliases-list)
     (push '("so" "source") eshell-command-aliases-list)
-    (push '("emacs" "file-load $1") eshell-command-aliases-list))
+    (push '("emacs" "find-file $1") eshell-command-aliases-list))
 
+#+end_src
+** git
+#+begin_src emacs-lisp :tangle init.el
+  (leaf git-settings
+    :require nil
+    :config
+    (leaf magit
+      :ensure t
+      :bind
+      ("C-x g" . magit-status)))
 #+end_src
 ** custom-set-* > custom.el
 #+begin_src emacs-lisp :tangle init.el
